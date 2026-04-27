@@ -1,0 +1,58 @@
+-------------------------------------------------------------------------------
+Test set: com.phonestore.service.CartServiceTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 1, Errors: 3, Skipped: 0, Time elapsed: 0.263 s <<< FAILURE! -- in com.phonestore.service.CartServiceTest
+com.phonestore.service.CartServiceTest.clearCart_Success -- Time elapsed: 0.241 s <<< ERROR!
+org.mockito.exceptions.misusing.UnnecessaryStubbingException: 
+
+Unnecessary stubbings detected.
+Clean & maintainable test code requires zero unnecessary code.
+Following stubbings are unnecessary (click to navigate to relevant line of code):
+  1. -> at com.phonestore.service.CartServiceTest.setUp(CartServiceTest.java:57)
+Please remove unnecessary stubbings or use 'lenient' strictness. More info: javadoc for UnnecessaryStubbingException class.
+	at org.mockito.junit.jupiter.MockitoExtension.afterEach(MockitoExtension.java:192)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.phonestore.service.CartServiceTest.updateCartItem_Success -- Time elapsed: 0.006 s <<< ERROR!
+java.lang.RuntimeException: Cart not found
+	at com.phonestore.service.CartService.updateCartItem(CartService.java:125)
+	at com.phonestore.service.CartServiceTest.updateCartItem_Success(CartServiceTest.java:150)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.phonestore.service.CartServiceTest.removeFromCart_Success -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.RuntimeException: Cart not found
+	at com.phonestore.service.CartService.removeFromCart(CartService.java:163)
+	at com.phonestore.service.CartServiceTest.removeFromCart_Success(CartServiceTest.java:163)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.phonestore.service.CartServiceTest.addToCart_Success -- Time elapsed: 0.005 s <<< FAILURE!
+Argument(s) are different! Wanted:
+valueOperations.set(
+    <any string>,
+    <any string>,
+    <any>
+);
+-> at org.springframework.data.redis.core.ValueOperations.set(ValueOperations.java:70)
+Actual invocations have different arguments at position [1]:
+valueOperations.get(
+    "cart:user:1"
+);
+-> at com.phonestore.service.CartService.getCartFromRedis(CartService.java:222)
+valueOperations.set(
+    "cart:user:1",
+    null,
+    PT720H
+);
+-> at com.phonestore.service.CartService.saveCartToRedis(CartService.java:237)
+
+	at org.springframework.data.redis.core.ValueOperations.set(ValueOperations.java:70)
+	at com.phonestore.service.CartServiceTest.addToCart_Success(CartServiceTest.java:100)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
