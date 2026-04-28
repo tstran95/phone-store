@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chao mung den voi Phone Store</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #D70018; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9f9f9; padding: 20px; margin: 20px 0; }
+        .footer { text-align: center; color: #666; font-size: 12px; }
+        .btn { display: inline-block; background: #D70018; color: white; padding: 12px 24px;
+               text-decoration: none; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chao mung den voi Phone Store!</h1>
+        </div>
+
+        <div class="content">
+            <p>Xin chao <span th:text="${user.fullName}"></span>,</p>
+
+            <p>Chung toi rat vui vi ban da tham gia Phone Store. Tu gio ban co the:</p>
+            <ul>
+                <li>Mua sam hang ngan san pham cong nghe</li>
+                <li>Theo doi don hang de dang</li>
+                <li>Nhan uu dai dac biet danh cho thanh vien</li>
+            </ul>
+
+            <p style="text-align: center;">
+                <a th:href="${loginUrl}" class="btn">Bat dau mua sam</a>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2024 Phone Store. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

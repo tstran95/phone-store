@@ -1,0 +1,315 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply font-sans text-gray-800 bg-gray-50 antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-gray-900;
+  }
+
+  a {
+    @apply text-gray-700 hover:text-primary transition-colors;
+  }
+
+  button {
+    @apply cursor-pointer transition-all duration-200;
+  }
+
+  img {
+    @apply max-w-full h-auto;
+  }
+}
+
+/* ========================================
+   COMPONENT STYLES - Cellphones Pattern
+   ======================================== */
+@layer components {
+  /* Container */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-hover shadow-md hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary text-white hover:bg-secondary-hover;
+  }
+
+  .btn-outline {
+    @apply btn border-2 border-primary text-primary hover:bg-primary hover:text-white;
+  }
+
+  .btn-ghost {
+    @apply btn text-gray-700 hover:bg-gray-100;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-lg;
+  }
+
+  /* Cards - Cellphones Style */
+  .product-card {
+    @apply bg-white rounded-xl shadow-card hover:shadow-card-hover
+           transition-all duration-300 overflow-hidden cursor-pointer;
+  }
+
+  .product-card:hover {
+    @apply -translate-y-1;
+  }
+
+  .product-card:hover {
+    @apply -translate-y-1;
+  }
+
+  .category-card {
+    @apply bg-white rounded-xl p-4 text-center transition-all duration-200
+           hover:shadow-card hover:-translate-y-0.5 cursor-pointer;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-discount {
+    @apply badge bg-accent-orange text-white;
+  }
+
+  .badge-new {
+    @apply badge bg-accent-green text-white;
+  }
+
+  .badge-hot {
+    @apply badge bg-primary text-white;
+  }
+
+  /* Form Elements */
+  .input {
+    @apply w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg
+           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+           placeholder-gray-400 transition-all duration-200;
+  }
+
+  .input-error {
+    @apply input border-red-500 focus:ring-red-500;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  /* Price Display */
+  .price-current {
+    @apply text-xl font-bold text-primary;
+  }
+
+  .price-original {
+    @apply text-sm text-gray-400 line-through;
+  }
+
+  .price-discount {
+    @apply text-sm text-accent-orange font-medium;
+  }
+
+  /* Navigation */
+  .nav-link {
+    @apply px-4 py-2 text-gray-700 hover:text-primary hover:bg-primary-light
+           rounded-lg transition-all duration-200;
+  }
+
+  .nav-link-active {
+    @apply nav-link text-primary bg-primary-light font-medium;
+  }
+
+  /* Section */
+  .section {
+    @apply py-8 md:py-12;
+  }
+
+  .section-title {
+    @apply text-2xl md:text-3xl font-bold text-gray-900 mb-6;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    @apply flex items-center space-x-2 text-sm text-gray-500;
+  }
+
+  .breadcrumb-item {
+    @apply hover:text-primary transition-colors;
+  }
+
+  /* Loading Skeleton */
+  .skeleton {
+    @apply bg-gray-200 animate-pulse rounded;
+  }
+
+  /* Toast */
+  .toast-success {
+    @apply bg-accent-green text-white;
+  }
+
+  .toast-error {
+    @apply bg-red-500 text-white;
+  }
+
+  .toast-warning {
+    @apply bg-accent-yellow text-white;
+  }
+}
+
+/* ========================================
+   UTILITY STYLES
+   ======================================== */
+@layer utilities {
+  /* Line clamp */
+  .line-clamp-1 {
+    @apply overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Aspect ratios */
+  .aspect-product {
+    aspect-ratio: 1 / 1;
+  }
+
+  .aspect-banner {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-accent-orange bg-clip-text text-transparent;
+  }
+
+  /* Shadow hover */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  /* Grid patterns */
+  .grid-products {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4;
+  }
+
+  /* Container queries support */
+  .container-query {
+    container-type: inline-size;
+  }
+}
+
+/* ========================================
+   SWIPER CUSTOMIZATION
+   ======================================== */
+.swiper-button-prev,
+.swiper-button-next {
+  @apply w-10 h-10 bg-white/90 rounded-full shadow-lg text-gray-800
+         hover:bg-primary hover:text-white transition-all duration-200;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+  @apply text-lg font-bold;
+}
+
+.swiper-pagination-bullet {
+  @apply w-2.5 h-2.5 bg-gray-300 opacity-100;
+}
+
+.swiper-pagination-bullet-active {
+  @apply bg-primary;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ========================================
+   RESPONSIVE UTILITIES
+   ======================================== */
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .show-mobile-only {
+    display: none !important;
+  }
+}

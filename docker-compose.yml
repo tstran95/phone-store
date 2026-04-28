@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # MariaDB - Primary Database (ACID)
+  # ============================================
+  mariadb:
+    image: mariadb:10.6
+    container_name: phonestore-mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: phonestore_db
+      MYSQL_USER: phonestore
+      MYSQL_PASSWORD: phonestore123
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./db/init-mariadb.sql:/docker-entrypoint-initdb.d/init-mariadb.sql
+    networks:
+      - phonestore-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # MongoDB - Document Store (Logs, Analytics)
+  # ============================================
+  mongodb:
+    image: mongo:6.0
+    container_name: phonestore-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: phonestore_logs
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - phonestore-network
+    command: mongod --auth --bind_ip_all
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/phonestore_logs --authenticationDatabase admin -u admin -p admin123 --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Redis - Cache, Session, Cart
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: phonestore-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./db/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - phonestore-network
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============================================
+  # MongoDB Express (Admin UI - Optional)
+  # ============================================
+  mongo-express:
+    image: mongo-express:1.0.0
+    container_name: phonestore-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin123
+      ME_CONFIG_MONGODB_URL: mongodb://admin:admin123@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123
+    networks:
+      - phonestore-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  # ============================================
+  # phpMyAdmin (MariaDB Admin UI - Optional)
+  # ============================================
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phonestore-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root123
+    networks:
+      - phonestore-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+volumes:
+  mariadb_data:
+    driver: local
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  phonestore-network:
+    driver: bridge
+    name: phonestore-network

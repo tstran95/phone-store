@@ -1,0 +1,7 @@
+com/phonestore/PhoneStoreApplicationTests.class
+com/phonestore/service/ProductServiceTest.class
+com/phonestore/controller/AuthControllerTest.class
+com/phonestore/service/InventoryServiceTest.class
+com/phonestore/service/CartServiceTest.class
+com/phonestore/service/AuthServiceTest.class
+com/phonestore/service/OrderServiceTest.class
