@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -31,5 +32,16 @@ public class PagedResponse<T> {
         response.setTotalPages(0);
         response.setLast(true);
         return response;
+    }
+
+    public static <T> PagedResponse<T> fromPage(Page<T> page) {
+        return PagedResponse.<T>builder()
+                .content(page.getContent())
+                .pageNumber(page.getNumber())
+                .pageSize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .last(page.isLast())
+                .build();
     }
 }

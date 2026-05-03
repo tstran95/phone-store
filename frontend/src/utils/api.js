@@ -35,6 +35,9 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
+    // Skip auth endpoints - let components handle their own errors
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/')
+
     // Handle token refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
@@ -67,9 +70,12 @@ api.interceptors.response.use(
       }
     }
 
-    // Handle errors
-    const message = error.response?.data?.message || 'Có lỗi xảy ra'
-    toast.error(message)
+    // Handle errors - skip toast for auth endpoints
+    if (!isAuthEndpoint) {
+      const message = error.response?.data?.message || 'Có lỗi xảy ra'
+      toast.error(message)
+    }
+
     return Promise.reject(error)
   }
 )
@@ -83,6 +89,7 @@ export const authApi = {
   forgotPassword: (data) => api.post('/auth/forgot-password', data),
   verifyResetToken: (token) => api.get('/auth/verify-reset-token', { params: { token } }),
   resetPassword: (data) => api.post('/auth/reset-password', data),
+  mergeCart: (sessionId) => api.post('/auth/merge-cart', null, { params: { sessionId } }),
 }
 
 // Product API
@@ -99,6 +106,12 @@ export const productApi = {
 export const categoryApi = {
   getAll: () => api.get('/categories'),
   getBySlug: (slug) => api.get(`/categories/${slug}`),
+}
+
+// Brand API
+export const brandApi = {
+  getAll: (categoryId) => api.get('/brands', { params: categoryId ? { categoryId } : {} }),
+  getBySlug: (slug) => api.get(`/brands/${slug}`),
 }
 
 // Cart API
@@ -157,6 +170,34 @@ export const notificationApi = {
   getUnreadCount: () => api.get('/notifications/unread-count'),
   markAsRead: (id) => api.post(`/notifications/${id}/read`),
   markAllAsRead: () => api.post('/notifications/read-all'),
+}
+
+// Admin API
+export const adminApi = {
+  // Dashboard
+  getDashboardStats: () => api.get('/admin/dashboard/stats'),
+  getRecentOrders: (limit = 10) => api.get('/admin/dashboard/recent-orders', { params: { limit } }),
+  getTopProducts: (limit = 10) => api.get('/admin/dashboard/top-products', { params: { limit } }),
+
+  // Products
+  getProducts: (params) => api.get('/admin/products', { params }),
+  getProduct: (id) => api.get(`/admin/products/${id}`),
+  createProduct: (data) => api.post('/admin/products', data),
+  updateProduct: (id, data) => api.put(`/admin/products/${id}`, data),
+  deleteProduct: (id) => api.delete(`/admin/products/${id}`),
+  toggleProductStatus: (id, active) => api.patch(`/admin/products/${id}/status?active=${active}`),
+
+  // Users
+  getUsers: (params) => api.get('/admin/users', { params }),
+  getUser: (id) => api.get(`/admin/users/${id}`),
+  updateUserStatus: (id, status) => api.patch(`/admin/users/${id}/status?status=${status}`),
+  updateUserRole: (id, role) => api.patch(`/admin/users/${id}/role?role=${role}`),
+
+  // Orders
+  getOrders: (params) => api.get('/admin/orders', { params }),
+  getOrder: (orderNumber) => api.get(`/admin/orders/${orderNumber}`),
+  updateOrderStatus: (orderNumber, status, note) =>
+    api.patch(`/admin/orders/${orderNumber}/status?status=${status}`, { note }),
 }
 
 export default api

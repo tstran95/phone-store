@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { productApi } from '../utils/api'
 import { useCartStore } from '../stores/cartStore'
+import ProductImage from '../components/common/ProductImage'
 import { formatPrice } from '../utils/format'
 import ProductCard from '../components/common/ProductCard'
 import { ProductCardSkeleton } from '../components/common/LoadingSkeleton'
@@ -155,12 +156,8 @@ function ProductDetail() {
             {/* Image Gallery */}
             <div>
               <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4">
-                <img
-                  src={
-                    product.images?.[activeImage] ||
-                    product.thumbnail ||
-                    '/placeholder.jpg'
-                  }
+                <ProductImage
+                  src={product.images?.[activeImage]?.imageUrl || product.thumbnail}
                   alt={product.name}
                   className="w-full h-full object-contain"
                 />
@@ -177,8 +174,8 @@ function ProductDetail() {
                           : 'border-transparent'
                       }`}
                     >
-                      <img
-                        src={image}
+                      <ProductImage
+                        src={image?.imageUrl || image}
                         alt={`${product.name} - ${index + 1}`}
                         className="w-full h-full object-cover"
                       />

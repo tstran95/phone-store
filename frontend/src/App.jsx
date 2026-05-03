@@ -18,6 +18,9 @@ import SearchResults from './pages/SearchResults'
 // Admin imports
 import AdminLayout from './components/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminProducts from './pages/admin/AdminProducts'
+import AdminOrders from './pages/admin/AdminOrders'
+import AdminUsers from './pages/admin/AdminUsers'
 
 function App() {
   return (
@@ -43,9 +46,9 @@ function App() {
       {/* Admin routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
-        <Route path="products" element={<div>Products Page (Coming Soon)</div>} />
-        <Route path="orders" element={<div>Orders Page (Coming Soon)</div>} />
-        <Route path="users" element={<div>Users Page (Coming Soon)</div>} />
+        <Route path="products" element={<AdminProducts />} />
+        <Route path="orders" element={<AdminOrders />} />
+        <Route path="users" element={<AdminUsers />} />
         <Route path="analytics" element={<div>Analytics Page (Coming Soon)</div>} />
         <Route path="settings" element={<div>Settings Page (Coming Soon)</div>} />
       </Route>

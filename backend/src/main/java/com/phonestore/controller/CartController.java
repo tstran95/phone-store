@@ -6,11 +6,13 @@ import com.phonestore.dto.response.ApiResponse;
 import com.phonestore.dto.response.CartResponse;
 import com.phonestore.entity.User;
 import com.phonestore.service.CartService;
+import com.phonestore.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,13 +29,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class CartController {
 
     private final CartService cartService;
+    private final UserService userService;
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        String email = auth.getName();
+        return userService.findByEmail(email).orElse(null);
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<CartResponse>> getCart(
-            @AuthenticationPrincipal User user,
             @RequestParam(required = false) String sessionId,
             HttpServletRequest request) {
 
+        User user = getCurrentUser();
         Long userId = user != null ? user.getId() : null;
         String sid = getSessionId(userId, sessionId, request);
 
@@ -43,11 +55,11 @@ public class CartController {
 
     @PostMapping("/items")
     public ResponseEntity<ApiResponse<CartResponse>> addToCart(
-            @AuthenticationPrincipal User user,
             @RequestParam(required = false) String sessionId,
             @Valid @RequestBody AddToCartRequest addRequest,
             HttpServletRequest request) {
 
+        User user = getCurrentUser();
         Long userId = user != null ? user.getId() : null;
         String sid = getSessionId(userId, sessionId, request);
 
@@ -57,12 +69,12 @@ public class CartController {
 
     @PutMapping("/items/{itemId}")
     public ResponseEntity<ApiResponse<CartResponse>> updateCartItem(
-            @AuthenticationPrincipal User user,
             @RequestParam(required = false) String sessionId,
             @PathVariable String itemId,
             @Valid @RequestBody UpdateCartItemRequest updateRequest,
             HttpServletRequest request) {
 
+        User user = getCurrentUser();
         Long userId = user != null ? user.getId() : null;
         String sid = getSessionId(userId, sessionId, request);
 
@@ -72,11 +84,11 @@ public class CartController {
 
     @DeleteMapping("/items/{itemId}")
     public ResponseEntity<ApiResponse<CartResponse>> removeFromCart(
-            @AuthenticationPrincipal User user,
             @RequestParam(required = false) String sessionId,
             @PathVariable String itemId,
             HttpServletRequest request) {
 
+        User user = getCurrentUser();
         Long userId = user != null ? user.getId() : null;
         String sid = getSessionId(userId, sessionId, request);
 
@@ -86,10 +98,10 @@ public class CartController {
 
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> clearCart(
-            @AuthenticationPrincipal User user,
             @RequestParam(required = false) String sessionId,
             HttpServletRequest request) {
 
+        User user = getCurrentUser();
         Long userId = user != null ? user.getId() : null;
         String sid = getSessionId(userId, sessionId, request);
 

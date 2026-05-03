@@ -2,12 +2,16 @@ package com.phonestore.dto.request;
 
 import com.phonestore.enums.PaymentMethod;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -40,4 +44,27 @@ public class CheckoutRequest {
     private String shippingMethod;
     private String customerNote;
     private String couponCode;
+
+    // Cart items from frontend
+    @NotEmpty(message = "Cart items are required")
+    private List<CartItemRequest> items;
+
+    private BigDecimal subtotal;
+    private BigDecimal discountAmount;
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CartItemRequest {
+        private Long productId;
+        private Long variantId;
+        private String productName;
+        private String productImage;
+        private String variantName;
+        private Integer quantity;
+        private BigDecimal unitPrice;
+        private BigDecimal totalPrice;
+    }
 }

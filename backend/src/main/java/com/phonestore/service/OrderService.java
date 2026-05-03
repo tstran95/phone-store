@@ -23,10 +23,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -48,15 +51,13 @@ public class OrderService {
 
     @Transactional
     public OrderResponse createOrder(Long userId, CheckoutRequest request) {
-        // Get cart
-        CartResponse cart = cartService.getCart(userId, null);
-
-        if (cart.getItems() == null || cart.getItems().isEmpty()) {
+        // Validate items from request
+        if (request.getItems() == null || request.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
 
         // Validate stock for all items
-        for (CartResponse.CartItemResponse item : cart.getItems()) {
+        for (CheckoutRequest.CartItemRequest item : request.getItems()) {
             validateStock(item);
         }
 
@@ -64,10 +65,10 @@ public class OrderService {
         String orderNumber = generateOrderNumber();
 
         // Calculate amounts
-        BigDecimal subtotal = cart.getSubtotal();
+        BigDecimal subtotal = request.getSubtotal() != null ? request.getSubtotal() : calculateSubtotal(request.getItems());
         BigDecimal shippingFee = calculateShippingFee(subtotal);
         BigDecimal taxAmount = subtotal.multiply(BigDecimal.valueOf(0.1)); // 10% tax
-        BigDecimal discountAmount = cart.getDiscountAmount();
+        BigDecimal discountAmount = request.getDiscountAmount() != null ? request.getDiscountAmount() : BigDecimal.ZERO;
         BigDecimal totalAmount = subtotal.add(shippingFee).add(taxAmount).subtract(discountAmount);
 
         // Create order
@@ -97,7 +98,7 @@ public class OrderService {
 
         // Create order items
         List<OrderItem> orderItems = new ArrayList<>();
-        for (CartResponse.CartItemResponse item : cart.getItems()) {
+        for (CheckoutRequest.CartItemRequest item : request.getItems()) {
             OrderItem orderItem = OrderItem.builder()
                     .order(savedOrder)
                     .product(Product.builder().id(item.getProductId()).build())
@@ -178,7 +179,13 @@ public class OrderService {
         return mapToOrderResponse(order);
     }
 
-    private void validateStock(CartResponse.CartItemResponse item) {
+    private BigDecimal calculateSubtotal(List<CheckoutRequest.CartItemRequest> items) {
+        return items.stream()
+                .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private void validateStock(CheckoutRequest.CartItemRequest item) {
         if (item.getVariantId() != null) {
             ProductVariant variant = variantRepository.findById(item.getVariantId())
                     .orElseThrow(() -> new RuntimeException("Variant not found"));
@@ -194,7 +201,7 @@ public class OrderService {
         }
     }
 
-    private void decreaseStock(CartResponse.CartItemResponse item) {
+    private void decreaseStock(CheckoutRequest.CartItemRequest item) {
         if (item.getVariantId() != null) {
             variantRepository.decreaseStock(item.getVariantId(), item.getQuantity());
         }
@@ -236,7 +243,7 @@ public class OrderService {
         return BigDecimal.valueOf(30000);
     }
 
-    private String getProductSku(CartResponse.CartItemResponse item) {
+    private String getProductSku(CheckoutRequest.CartItemRequest item) {
         if (item.getVariantId() != null) {
             return variantRepository.findById(item.getVariantId())
                     .map(ProductVariant::getSku)
@@ -289,5 +296,91 @@ public class OrderService {
                 order.getShippingWard(),
                 order.getShippingDistrict(),
                 order.getShippingProvince());
+    }
+
+    // ==================== ADMIN METHODS ====================
+
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getAllOrdersForAdmin(String status, String search, Pageable pageable) {
+        Specification<Order> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (status != null && !status.isEmpty()) {
+                predicates.add(cb.equal(root.get("status"), OrderStatus.valueOf(status)));
+            }
+
+            if (search != null && !search.isEmpty()) {
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("orderNumber")), "%" + search.toLowerCase() + "%"),
+                        cb.like(cb.lower(root.get("shippingName")), "%" + search.toLowerCase() + "%"),
+                        cb.like(cb.lower(root.get("shippingPhone")), "%" + search.toLowerCase() + "%")
+                ));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return orderRepository.findAll(spec, pageable)
+                .map(this::mapToOrderResponse);
+    }
+
+    @Transactional
+    public OrderResponse updateOrderStatus(String orderNumber, String statusStr, String note) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        OrderStatus newStatus = OrderStatus.valueOf(statusStr);
+        OrderStatus oldStatus = order.getStatus();
+
+        order.setStatus(newStatus);
+
+        if (newStatus == OrderStatus.SHIPPED) {
+            order.setShippedAt(LocalDateTime.now());
+        } else if (newStatus == OrderStatus.DELIVERED) {
+            order.setDeliveredAt(LocalDateTime.now());
+        }
+
+        Order saved = orderRepository.save(order);
+
+        addStatusHistory(saved, oldStatus, newStatus, null, note);
+
+        return mapToOrderResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getRecentOrders(int limit) {
+        return orderRepository.findAll(
+                        PageRequest.of(0, limit, Sort.by("createdAt").descending()))
+                .getContent()
+                .stream()
+                .map(this::mapToOrderResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public long countOrders() {
+        return orderRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public long countOrdersByStatus(OrderStatus status) {
+        return orderRepository.countByStatus(status);
+    }
+
+    @Transactional(readOnly = true)
+    public long countOrdersToday() {
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+        return orderRepository.countByCreatedAtAfter(today);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getTotalRevenue() {
+        return orderRepository.calculateTotalRevenue();
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getRevenueToday() {
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+        return orderRepository.calculateRevenueAfter(today);
     }
 }

@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Heart, Star } from 'lucide-react'
 import { useCartStore } from '../../stores/cartStore'
-import { useWishlistStore } from '../../stores/wishlistStore'
-import { useAuthStore } from '../../stores/authStore'
 import toast from 'react-hot-toast'
+import ProductImage from './ProductImage'
 
 function ProductCard({ product }) {
   const addItem = useCartStore((state) => state.addItem)
@@ -32,11 +31,10 @@ function ProductCard({ product }) {
     <Link to={`/san-pham/${product.slug}`} className="product-card">
       {/* Image Container */}
       <div className="relative aspect-product bg-gray-100 overflow-hidden">
-        <img
-          src={product.thumbnail || product.images?.[0] || '/placeholder.jpg'}
+        <ProductImage
+          src={product.thumbnail || product.images?.[0]?.imageUrl}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
         />
 
         {/* Discount Badge */}

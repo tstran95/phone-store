@@ -7,11 +7,11 @@ import com.phonestore.dto.response.ReviewResponse;
 import com.phonestore.dto.response.ReviewStatsResponse;
 import com.phonestore.entity.User;
 import com.phonestore.service.ReviewService;
+import com.phonestore.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +27,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final UserService userService;
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        String email = auth.getName();
+        return userService.findByEmail(email).orElse(null);
+    }
 
     @GetMapping("/products/{productId}/reviews")
     public ResponseEntity<ApiResponse<PagedResponse<ReviewResponse>>> getProductReviews(
@@ -38,19 +48,19 @@ public class ReviewController {
 
     @GetMapping("/products/{productId}/reviews/stats")
     public ResponseEntity<ApiResponse<ReviewStatsResponse>> getReviewStats(@PathVariable Long productId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = null;
-        if (auth != null && auth.getPrincipal() instanceof User user) {
-            userId = user.getId();
-        }
+        User user = getCurrentUser();
+        Long userId = user != null ? user.getId() : null;
         return ResponseEntity.ok(ApiResponse.success(reviewService.getReviewStats(productId, userId)));
     }
 
     @PostMapping("/products/{productId}/reviews")
     public ResponseEntity<ApiResponse<ReviewResponse>> createReview(
-            @AuthenticationPrincipal User user,
             @PathVariable Long productId,
             @Valid @RequestBody ReviewRequest request) {
+        User user = getCurrentUser();
+        if (user == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error(401, "Unauthorized", null));
+        }
         return ResponseEntity.ok(ApiResponse.success(reviewService.createReview(user.getId(), productId, request)));
     }
 

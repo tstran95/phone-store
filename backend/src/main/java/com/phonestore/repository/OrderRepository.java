@@ -5,6 +5,7 @@ import com.phonestore.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
 
     Optional<Order> findByOrderNumber(String orderNumber);
 
@@ -33,4 +34,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.user.id = :userId AND o.status = :status")
     long countByUserIdAndStatus(@Param("userId") Long userId, @Param("status") OrderStatus status);
+
+    // Admin methods
+    long countByStatus(OrderStatus status);
+
+    long countByCreatedAtAfter(LocalDateTime date);
+
+    @Query("SELECT COUNT(o) FROM Order o")
+    long countTotalOrders();
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status NOT IN ('CANCELLED', 'REFUNDED')")
+    java.math.BigDecimal calculateTotalRevenue();
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status NOT IN ('CANCELLED', 'REFUNDED') AND o.createdAt >= :date")
+    java.math.BigDecimal calculateRevenueAfter(@Param("date") LocalDateTime date);
 }

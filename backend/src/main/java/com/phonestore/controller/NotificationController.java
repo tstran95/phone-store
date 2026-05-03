@@ -5,9 +5,11 @@ import com.phonestore.dto.response.NotificationResponse;
 import com.phonestore.dto.response.PagedResponse;
 import com.phonestore.entity.User;
 import com.phonestore.service.NotificationService;
+import com.phonestore.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,13 +28,23 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final UserService userService;
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return null;
+        }
+        String email = auth.getName();
+        return userService.findByEmail(email).orElse(null);
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResponse<NotificationResponse>>> getNotifications(
-            @AuthenticationPrincipal User user,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        User user = getCurrentUser();
         if (user == null) {
             return ResponseEntity.ok(ApiResponse.success(PagedResponse.<NotificationResponse>builder()
                     .content(java.util.Collections.emptyList())
@@ -47,8 +59,8 @@ public class NotificationController {
     }
 
     @GetMapping("/unread")
-    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getUnreadNotifications(
-            @AuthenticationPrincipal User user) {
+    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getUnreadNotifications() {
+        User user = getCurrentUser();
         if (user == null) {
             return ResponseEntity.ok(ApiResponse.success(java.util.Collections.emptyList()));
         }
@@ -56,8 +68,8 @@ public class NotificationController {
     }
 
     @GetMapping("/unread-count")
-    public ResponseEntity<ApiResponse<Long>> getUnreadCount(
-            @AuthenticationPrincipal User user) {
+    public ResponseEntity<ApiResponse<Long>> getUnreadCount() {
+        User user = getCurrentUser();
         if (user == null) {
             return ResponseEntity.ok(ApiResponse.success(0L));
         }
@@ -65,9 +77,8 @@ public class NotificationController {
     }
 
     @PostMapping("/{id}/read")
-    public ResponseEntity<ApiResponse<Void>> markAsRead(
-            @AuthenticationPrincipal User user,
-            @PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable Long id) {
+        User user = getCurrentUser();
         if (user == null) {
             return ResponseEntity.status(401).body(ApiResponse.error(401, "Unauthorized", null));
         }
@@ -76,8 +87,8 @@ public class NotificationController {
     }
 
     @PostMapping("/read-all")
-    public ResponseEntity<ApiResponse<Void>> markAllAsRead(
-            @AuthenticationPrincipal User user) {
+    public ResponseEntity<ApiResponse<Void>> markAllAsRead() {
+        User user = getCurrentUser();
         if (user == null) {
             return ResponseEntity.status(401).body(ApiResponse.error(401, "Unauthorized", null));
         }
@@ -86,7 +97,8 @@ public class NotificationController {
     }
 
     @GetMapping("/subscribe")
-    public SseEmitter subscribe(@AuthenticationPrincipal User user) {
+    public SseEmitter subscribe() {
+        User user = getCurrentUser();
         if (user == null) {
             throw new RuntimeException("Unauthorized");
         }

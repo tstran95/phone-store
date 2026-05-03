@@ -8,6 +8,7 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/config/RequestWrapper.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/CategoryRepository.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/InventoryTransactionResponse.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/UserResponse.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/WishlistController.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/config/DataInitializer.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/CartItem.java
@@ -48,6 +49,7 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/UserRepository.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/StockAlert.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/NotificationResponse.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/BrandController.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/CartService.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/PaymentRepository.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/EmailService.java
@@ -73,6 +75,7 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/Order.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/enums/Role.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/WishlistRepository.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/ProductRequest.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/request/InventoryAdjustmentRequest.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/request/RegisterRequest.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/NotificationController.java
@@ -85,6 +88,7 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/ReviewStatsResponse.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/enums/PaymentMethod.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/InventoryService.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/AdminController.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/ReviewService.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/WishlistResponse.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/UserAddress.java

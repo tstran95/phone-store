@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.UUID;
 
-@Component
+// Tạm thởi disable để test JWT
+// @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
 public class TraceTokenFilter implements Filter {
@@ -102,9 +103,6 @@ public class TraceTokenFilter implements Filter {
                 log.info("[REQUEST_END] [{}] {} - Status: {} - Duration: {}ms",
                         method, fullPath, statusCode, duration);
             }
-
-            // Flush response wrapper
-            wrappedResponse.getWriter().flush();
 
             // Clean up ThreadContext
             ThreadContext.remove(TRACE_TOKEN_KEY);

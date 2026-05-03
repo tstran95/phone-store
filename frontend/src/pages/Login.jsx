@@ -3,12 +3,14 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react'
 import { authApi } from '../utils/api'
 import { useAuthStore } from '../stores/authStore'
+import { useCartStore } from '../stores/cartStore'
 import toast from 'react-hot-toast'
 
 function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const { setAuth } = useAuthStore()
+  const { getSessionId, clearSessionId } = useCartStore()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -40,16 +42,62 @@ function Login() {
 
     setLoading(true)
     try {
-      const response = await authApi.login(formData)
-      if (response.success) {
-        const { user, accessToken, refreshToken } = response.data
+      // response đã là response.data từ interceptor
+      let result = await authApi.login(formData)
+
+      console.log('Parsed result:', result)
+
+      // Fix: Response từ backend đang bị duplicate JSON string
+      // VD: {"success":true...}{"success":true...}
+      if (typeof result === 'string') {
+        // Tìm kết thúc của JSON object đầu tiên bằng cách đếm braces
+        let braceCount = 0
+        let endPos = 0
+        for (let i = 0; i < result.length; i++) {
+          if (result[i] === '{') braceCount++
+          else if (result[i] === '}') braceCount--
+
+          if (braceCount === 0 && i > 0) {
+            endPos = i + 1
+            break
+          }
+        }
+        if (endPos > 0) {
+          result = result.substring(0, endPos)
+        }
+        result = JSON.parse(result)
+      }
+
+      // Backend trả về: { success: true, data: { user, accessToken, refreshToken } }
+      if (result && result.success === true && result.data) {
+        const { user, accessToken, refreshToken } = result.data
         setAuth(user, accessToken, refreshToken)
-        toast.success('Đăng nhập thành công!')
+
+        // Merge guest cart to user cart if session exists
+        const sessionId = getSessionId()
+        if (sessionId) {
+          try {
+            await authApi.mergeCart(sessionId)
+            clearSessionId()
+          } catch (e) {
+            console.log('Cart merge failed or no guest cart:', e)
+          }
+        }
+
+        toast.success(result.message || 'Đăng nhập thành công!')
+
         const from = location.state?.from?.pathname || '/'
         navigate(from, { replace: true })
+      } else {
+        // Login thất bại - hiển thị lỗi
+        const errorMsg = result?.message || 'Đăng nhập thất bại'
+        toast.error(errorMsg)
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Đăng nhập thất bại')
+      console.error('Login error:', error)
+      // Lỗi từ API (network, server error)
+      const errorMsg = error?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.'
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -113,9 +161,8 @@ function Login() {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  className={`input pl-10 pr-10 ${
-                    errors.password ? 'input-error' : ''
-                  }`}
+                  className={`input pl-10 pr-10 ${errors.password ? 'input-error' : ''
+                    }`}
                 />
                 <button
                   type="button"

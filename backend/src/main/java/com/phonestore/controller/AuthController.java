@@ -7,10 +7,14 @@ import com.phonestore.dto.request.ResetPasswordRequest;
 import com.phonestore.dto.response.ApiResponse;
 import com.phonestore.dto.response.AuthResponse;
 import com.phonestore.service.AuthService;
+import com.phonestore.service.CartService;
+import com.phonestore.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final CartService cartService;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(
@@ -81,5 +87,16 @@ public class AuthController {
         authService.resetPassword(request);
         return ResponseEntity.ok(ApiResponse.success(
                 "Đặt lại mật khẩu thành công", null));
+    }
+
+    @PostMapping("/merge-cart")
+    public ResponseEntity<ApiResponse<Void>> mergeCart(
+            @RequestParam String sessionId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        userService.findByEmail(email).ifPresent(user -> {
+            cartService.mergeGuestCartToUserCart(sessionId, user.getId());
+        });
+        return ResponseEntity.ok(ApiResponse.success("Cart merged", null));
     }
 }

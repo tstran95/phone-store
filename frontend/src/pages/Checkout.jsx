@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ChevronRight,
@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { useCartStore } from '../stores/cartStore'
 import { useAuthStore } from '../stores/authStore'
-import { orderApi, paymentApi } from '../utils/api'
+import { orderApi, paymentApi, cartApi } from '../utils/api'
 import { formatPrice } from '../utils/format'
 import toast from 'react-hot-toast'
 
@@ -23,12 +23,60 @@ const paymentMethods = [
 
 function Checkout() {
   const navigate = useNavigate()
-  const { items, coupon, discount, getSubtotal, getTotal, clearCart } =
+  const { items, coupon, discount, getSubtotal, getTotal, clearCart, getSessionId, clearSessionId } =
     useCartStore()
   const { user, isAuthenticated } = useAuthStore()
 
   const [loading, setLoading] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState('cod')
+  const [backendCart, setBackendCart] = useState(null)
+
+  // Sync local cart to backend on mount
+  useEffect(() => {
+    if (isAuthenticated && items.length > 0) {
+      syncCartToBackend()
+    }
+  }, [isAuthenticated])
+
+  const syncCartToBackend = async () => {
+    setSyncing(true)
+    try {
+      // First try to merge any existing guest cart
+      const sessionId = getSessionId()
+      if (sessionId) {
+        try {
+          await cartApi.merge(sessionId)
+          clearSessionId()
+        } catch (e) {
+          console.log('No guest cart to merge')
+        }
+      }
+
+      // Add all local items to backend cart
+      for (const item of items) {
+        try {
+          await cartApi.addItem({
+            productId: item.productId,
+            variantId: item.variantId,
+            quantity: item.quantity
+          })
+        } catch (e) {
+          console.log('Failed to add item to backend cart:', item.id, e)
+        }
+      }
+
+      // Get updated backend cart
+      const response = await cartApi.get()
+      if (response.success) {
+        setBackendCart(response.data)
+      }
+    } catch (error) {
+      console.error('Cart sync error:', error)
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   const [shippingInfo, setShippingInfo] = useState({
     fullName: user?.fullName || '',
@@ -60,6 +108,22 @@ function Checkout() {
           <Link to="/dang-nhap" className="btn-primary inline-block">
             Đăng nhập ngay
           </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (syncing) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
+        <div className="text-center bg-white rounded-2xl shadow-card p-8 max-w-md">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+          <h2 className="text-xl font-bold mb-2">Đang đồng bộ giỏ hàng...</h2>
+          <p className="text-gray-500 mb-4">
+            Vui lòng đợi trong giây lát
+          </p>
         </div>
       </div>
     )
@@ -98,18 +162,32 @@ function Checkout() {
 
     setLoading(true)
     try {
+      // Map cart items to order items
+      const orderItems = items.map(item => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        productName: item.name,
+        productImage: typeof item.image === 'string' ? item.image : null,
+        variantName: item.variantName,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        totalPrice: item.price * item.quantity
+      }))
+
       const orderData = {
-        shippingAddress: {
-          fullName: shippingInfo.fullName,
-          phone: shippingInfo.phone,
-          address: shippingInfo.address,
-          city: shippingInfo.city,
-          district: shippingInfo.district,
-          ward: shippingInfo.ward,
-        },
-        note: shippingInfo.note,
+        shippingName: shippingInfo.fullName,
+        shippingPhone: shippingInfo.phone,
+        shippingAddress: shippingInfo.address,
+        shippingProvince: shippingInfo.city,
+        shippingDistrict: shippingInfo.district,
+        shippingWard: shippingInfo.ward,
+        shippingMethod: 'standard',
+        customerNote: shippingInfo.note,
         paymentMethod: selectedPayment.toUpperCase(),
         couponCode: coupon?.code,
+        items: orderItems,
+        subtotal: subtotal,
+        discountAmount: discount
       }
 
       const response = await orderApi.create(orderData)

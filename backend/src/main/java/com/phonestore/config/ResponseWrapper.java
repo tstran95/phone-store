@@ -5,14 +5,18 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
 public class ResponseWrapper extends HttpServletResponseWrapper {
 
     private final ByteArrayOutputStream capture;
-    private ServletOutputStream outputStream;
+    private TeeServletOutputStream teeStream;
     private PrintWriter writer;
+    private boolean writerUsed = false;
 
     public ResponseWrapper(HttpServletResponse response) {
         super(response);
@@ -20,59 +24,28 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
     }
 
     @Override
-    public ServletOutputStream getOutputStream() {
-        if (writer != null) {
+    public ServletOutputStream getOutputStream() throws IOException {
+        if (writerUsed) {
             throw new IllegalStateException("getWriter() has already been called on this response.");
         }
 
-        if (outputStream == null) {
-            outputStream = new ServletOutputStream() {
-                @Override
-                public boolean isReady() {
-                    return true;
-                }
-
-                @Override
-                public void setWriteListener(WriteListener writeListener) {
-                    throw new UnsupportedOperationException();
-                }
-
-                @Override
-                public void write(int b) throws IOException {
-                    capture.write(b);
-                    ResponseWrapper.super.getOutputStream().write(b);
-                }
-            };
+        if (teeStream == null) {
+            teeStream = new TeeServletOutputStream(super.getOutputStream(), capture);
         }
 
-        return outputStream;
+        return teeStream;
     }
 
     @Override
     public PrintWriter getWriter() throws IOException {
-        if (outputStream != null) {
+        if (teeStream != null) {
             throw new IllegalStateException("getOutputStream() has already been called on this response.");
         }
 
         if (writer == null) {
-            writer = new PrintWriter(new OutputStreamWriter(capture, StandardCharsets.UTF_8)) {
-                @Override
-                public void flush() {
-                    try {
-                        ResponseWrapper.super.getWriter().write(capture.toString(StandardCharsets.UTF_8.name()));
-                        ResponseWrapper.super.getWriter().flush();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    super.flush();
-                }
-
-                @Override
-                public void close() {
-                    flush();
-                    super.close();
-                }
-            };
+            writerUsed = true;
+            OutputStreamWriter osw = new OutputStreamWriter(capture, StandardCharsets.UTF_8);
+            writer = new PrintWriter(osw, true);
         }
 
         return writer;
@@ -87,5 +60,38 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
 
     public byte[] getBodyAsBytes() {
         return capture.toByteArray();
+    }
+
+    // Inner class to tee output to both capture and original stream
+    private static class TeeServletOutputStream extends ServletOutputStream {
+        private final ServletOutputStream original;
+        private final ByteArrayOutputStream capture;
+
+        TeeServletOutputStream(ServletOutputStream original, ByteArrayOutputStream capture) {
+            this.original = original;
+            this.capture = capture;
+        }
+
+        @Override
+        public boolean isReady() {
+            return original.isReady();
+        }
+
+        @Override
+        public void setWriteListener(WriteListener writeListener) {
+            original.setWriteListener(writeListener);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            original.write(b);
+            capture.write(b);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            original.write(b, off, len);
+            capture.write(b, off, len);
+        }
     }
 }

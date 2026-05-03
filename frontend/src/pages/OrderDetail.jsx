@@ -345,18 +345,15 @@ function OrderDetail() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-start gap-2">
                   <User className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <span className="font-medium">{order.shippingAddress?.fullName}</span>
+                  <span className="font-medium">{order.shippingName}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Phone className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <span>{order.shippingAddress?.phone}</span>
+                  <span>{order.shippingPhone}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <span>
-                    {order.shippingAddress?.address}, {order.shippingAddress?.ward},{' '}
-                    {order.shippingAddress?.district}, {order.shippingAddress?.city}
-                  </span>
+                  <span>{order.shippingAddress}</span>
                 </div>
               </div>
             </div>

@@ -1,12 +1,17 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+const generateSessionId = () => {
+  return 'sess_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+}
+
 export const useCartStore = create(
   persist(
     (set, get) => ({
       items: [],
       coupon: null,
       discount: 0,
+      sessionId: null,
 
       // Thêm sản phẩm vào giỏ
       addItem: (product, variant = null, quantity = 1) => {
@@ -102,6 +107,19 @@ export const useCartStore = create(
         const discount = get().discount
         return Math.max(0, subtotal - discount)
       },
+
+      // Get or create session ID for guest cart
+      getSessionId: () => {
+        let sessionId = get().sessionId
+        if (!sessionId) {
+          sessionId = generateSessionId()
+          set({ sessionId })
+        }
+        return sessionId
+      },
+
+      // Clear session ID after cart merge
+      clearSessionId: () => set({ sessionId: null }),
     }),
     {
       name: 'cart-storage',

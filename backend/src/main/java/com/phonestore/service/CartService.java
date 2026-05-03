@@ -36,10 +36,14 @@ public class CartService {
 
     public CartResponse getCart(Long userId, String sessionId) {
         String cartKey = buildCartKey(userId, sessionId);
+        System.out.println("DEBUG: Getting cart with key=" + cartKey + ", userId=" + userId + ", sessionId=" + sessionId);
         CartData cart = getCartFromRedis(cartKey);
 
         if (cart == null) {
+            System.out.println("DEBUG: Cart not found in Redis, creating empty cart");
             cart = createEmptyCart(userId, sessionId);
+        } else {
+            System.out.println("DEBUG: Found cart with " + cart.getItems().size() + " items");
         }
 
         return buildCartResponse(cart, cartKey);

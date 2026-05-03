@@ -282,4 +282,124 @@ public class ProductService {
                 .divide(product.getBasePrice(), 0, BigDecimal.ROUND_HALF_UP)
                 .intValue();
     }
+
+    // ==================== ADMIN METHODS ====================
+
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getAllProductsForAdmin(String search, Boolean active, Pageable pageable) {
+        Specification<Product> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (search != null && !search.isEmpty()) {
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"),
+                        cb.like(cb.lower(root.get("sku")), "%" + search.toLowerCase() + "%")
+                ));
+            }
+
+            if (active != null) {
+                predicates.add(cb.equal(root.get("isActive"), active));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return productRepository.findAll(spec, pageable)
+                .map(this::mapToProductResponse);
+    }
+
+    @Transactional
+    public ProductResponse createProduct(com.phonestore.controller.ProductRequest request) {
+        Product product = new Product();
+        product.setSku(request.getSku());
+        product.setName(request.getName());
+        product.setSlug(request.getSlug());
+        product.setDescription(request.getDescription());
+        product.setShortDescription(request.getShortDescription());
+        product.setBasePrice(request.getBasePrice());
+        product.setSalePrice(request.getSalePrice());
+        product.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
+        product.setIsFeatured(request.getIsFeatured() != null ? request.getIsFeatured() : false);
+
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            product.setCategory(category);
+        }
+
+        if (request.getBrandId() != null) {
+            Brand brand = brandRepository.findById(request.getBrandId())
+                    .orElseThrow(() -> new RuntimeException("Brand not found"));
+            product.setBrand(brand);
+        }
+
+        Product saved = productRepository.save(product);
+        return mapToProductResponse(saved);
+    }
+
+    @Transactional
+    public ProductResponse updateProduct(Long id, com.phonestore.controller.ProductRequest request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        product.setName(request.getName());
+        product.setSlug(request.getSlug());
+        product.setDescription(request.getDescription());
+        product.setShortDescription(request.getShortDescription());
+        product.setBasePrice(request.getBasePrice());
+        product.setSalePrice(request.getSalePrice());
+
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            product.setCategory(category);
+        }
+
+        if (request.getBrandId() != null) {
+            Brand brand = brandRepository.findById(request.getBrandId())
+                    .orElseThrow(() -> new RuntimeException("Brand not found"));
+            product.setBrand(brand);
+        }
+
+        Product saved = productRepository.save(product);
+        return mapToProductResponse(saved);
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setIsActive(false);
+        productRepository.save(product);
+    }
+
+    @Transactional
+    public ProductResponse toggleProductStatus(Long id, boolean active) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setIsActive(active);
+        Product saved = productRepository.save(product);
+        return mapToProductResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public long countProducts() {
+        return productRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public List<java.util.Map<String, Object>> getTopSellingProducts(int limit) {
+        return productRepository.findBestSellers(PageRequest.of(0, limit))
+                .stream()
+                .map(p -> {
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("id", p.getId());
+                    map.put("name", p.getName());
+                    map.put("sku", p.getSku());
+                    map.put("soldCount", p.getSoldCount());
+                    map.put("basePrice", p.getBasePrice());
+                    return map;
+                })
+                .toList();
+    }
 }
