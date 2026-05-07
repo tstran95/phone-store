@@ -1,14 +1,13 @@
 package com.phonestore.controller;
 
-import com.phonestore.dto.response.ApiResponse;
-import com.phonestore.dto.response.OrderResponse;
-import com.phonestore.dto.response.PagedResponse;
-import com.phonestore.dto.response.ProductResponse;
-import com.phonestore.dto.response.UserResponse;
-import com.phonestore.entity.Order;
-import com.phonestore.entity.Product;
-import com.phonestore.entity.User;
+import com.phonestore.dto.request.BannerRequest;
+import com.phonestore.dto.request.CategoryRequest;
+import com.phonestore.dto.response.*;
+import com.phonestore.entity.Banner;
+import com.phonestore.entity.Category;
 import com.phonestore.enums.OrderStatus;
+import com.phonestore.repository.BannerRepository;
+import com.phonestore.repository.CategoryRepository;
 import com.phonestore.service.OrderService;
 import com.phonestore.service.ProductService;
 import com.phonestore.service.UserService;
@@ -21,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +32,8 @@ public class AdminController {
     private final ProductService productService;
     private final UserService userService;
     private final OrderService orderService;
+    private final CategoryRepository categoryRepository;
+    private final BannerRepository bannerRepository;
 
     // ==================== PRODUCT MANAGEMENT ====================
 
@@ -179,5 +179,195 @@ public class AdminController {
             @RequestParam(defaultValue = "10") int limit) {
         List<Map<String, Object>> products = productService.getTopSellingProducts(limit);
         return ResponseEntity.ok(ApiResponse.success(products));
+    }
+
+    // ==================== CATEGORY MANAGEMENT ====================
+
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        List<CategoryResponse> response = categories.stream()
+                .map(this::mapToCategoryResponse)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/categories/{id}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        return ResponseEntity.ok(ApiResponse.success(mapToCategoryResponse(category)));
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(
+            @RequestBody CategoryRequest request) {
+        Category category = Category.builder()
+                .name(request.getName())
+                .slug(request.getSlug())
+                .description(request.getDescription())
+                .imageUrl(request.getImageUrl())
+                .displayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0)
+                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
+                .build();
+
+        if (request.getParentId() != null) {
+            Category parent = categoryRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new RuntimeException("Parent category not found"));
+            category.setParent(parent);
+        }
+
+        Category saved = categoryRepository.save(category);
+        return ResponseEntity.ok(ApiResponse.success("Category created", mapToCategoryResponse(saved)));
+    }
+
+    @PutMapping("/categories/{id}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
+            @PathVariable Long id,
+            @RequestBody CategoryRequest request) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        category.setName(request.getName());
+        category.setSlug(request.getSlug());
+        category.setDescription(request.getDescription());
+        category.setImageUrl(request.getImageUrl());
+        if (request.getDisplayOrder() != null) {
+            category.setDisplayOrder(request.getDisplayOrder());
+        }
+        if (request.getIsActive() != null) {
+            category.setIsActive(request.getIsActive());
+        }
+
+        if (request.getParentId() != null) {
+            Category parent = categoryRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new RuntimeException("Parent category not found"));
+            category.setParent(parent);
+        } else {
+            category.setParent(null);
+        }
+
+        Category saved = categoryRepository.save(category);
+        return ResponseEntity.ok(ApiResponse.success("Category updated", mapToCategoryResponse(saved)));
+    }
+
+    @DeleteMapping("/categories/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
+        categoryRepository.deleteById(id);
+        return ResponseEntity.ok(ApiResponse.success("Category deleted", null));
+    }
+
+    private CategoryResponse mapToCategoryResponse(Category category) {
+        return CategoryResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .slug(category.getSlug())
+                .description(category.getDescription())
+                .imageUrl(category.getImageUrl())
+                .parentId(category.getParent() != null ? category.getParent().getId() : null)
+                .displayOrder(category.getDisplayOrder())
+                .isActive(category.getIsActive())
+                .build();
+    }
+
+    // ==================== BANNER MANAGEMENT ====================
+
+    @GetMapping("/banners")
+    public ResponseEntity<ApiResponse<List<BannerResponse>>> getAllBanners() {
+        List<Banner> banners = bannerRepository.findAll();
+        List<BannerResponse> response = banners.stream()
+                .map(this::mapToBannerResponse)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/banners/{id}")
+    public ResponseEntity<ApiResponse<BannerResponse>> getBannerById(@PathVariable Long id) {
+        Banner banner = bannerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Banner not found"));
+        return ResponseEntity.ok(ApiResponse.success(mapToBannerResponse(banner)));
+    }
+
+    @PostMapping("/banners")
+    public ResponseEntity<ApiResponse<BannerResponse>> createBanner(
+            @RequestBody BannerRequest request) {
+        Banner banner = Banner.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .imageUrl(request.getImageUrl())
+                .linkUrl(request.getLinkUrl())
+                .buttonText(request.getButtonText())
+                .displayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0)
+                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
+                .position(request.getPosition() != null ? request.getPosition() : "HOME_MAIN")
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .build();
+
+        Banner saved = bannerRepository.save(banner);
+        return ResponseEntity.ok(ApiResponse.success("Banner created", mapToBannerResponse(saved)));
+    }
+
+    @PutMapping("/banners/{id}")
+    public ResponseEntity<ApiResponse<BannerResponse>> updateBanner(
+            @PathVariable Long id,
+            @RequestBody BannerRequest request) {
+        Banner banner = bannerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Banner not found"));
+
+        banner.setTitle(request.getTitle());
+        banner.setDescription(request.getDescription());
+        banner.setImageUrl(request.getImageUrl());
+        banner.setLinkUrl(request.getLinkUrl());
+        banner.setButtonText(request.getButtonText());
+        if (request.getDisplayOrder() != null) {
+            banner.setDisplayOrder(request.getDisplayOrder());
+        }
+        if (request.getIsActive() != null) {
+            banner.setIsActive(request.getIsActive());
+        }
+        if (request.getPosition() != null) {
+            banner.setPosition(request.getPosition());
+        }
+        banner.setStartDate(request.getStartDate());
+        banner.setEndDate(request.getEndDate());
+
+        Banner saved = bannerRepository.save(banner);
+        return ResponseEntity.ok(ApiResponse.success("Banner updated", mapToBannerResponse(saved)));
+    }
+
+    @DeleteMapping("/banners/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteBanner(@PathVariable Long id) {
+        bannerRepository.deleteById(id);
+        return ResponseEntity.ok(ApiResponse.success("Banner deleted", null));
+    }
+
+    @PostMapping("/banners/reorder")
+    public ResponseEntity<ApiResponse<Void>> reorderBanners(@RequestBody List<Map<String, Object>> orders) {
+        for (Map<String, Object> order : orders) {
+            Long id = Long.valueOf(order.get("id").toString());
+            Integer displayOrder = Integer.valueOf(order.get("displayOrder").toString());
+            bannerRepository.findById(id).ifPresent(banner -> {
+                banner.setDisplayOrder(displayOrder);
+                bannerRepository.save(banner);
+            });
+        }
+        return ResponseEntity.ok(ApiResponse.success("Banners reordered", null));
+    }
+
+    private BannerResponse mapToBannerResponse(Banner banner) {
+        return BannerResponse.builder()
+                .id(banner.getId())
+                .title(banner.getTitle())
+                .description(banner.getDescription())
+                .imageUrl(banner.getImageUrl())
+                .linkUrl(banner.getLinkUrl())
+                .buttonText(banner.getButtonText())
+                .displayOrder(banner.getDisplayOrder())
+                .isActive(banner.getIsActive())
+                .position(banner.getPosition())
+                .startDate(banner.getStartDate())
+                .endDate(banner.getEndDate())
+                .build();
     }
 }

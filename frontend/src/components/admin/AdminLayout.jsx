@@ -13,12 +13,16 @@ import {
   Bell,
   Search,
   ChevronDown,
+  Tag,
+  Image,
 } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 
 const sidebarItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/admin/products', icon: Package, label: 'Sản phẩm' },
+  { path: '/admin/categories', icon: Tag, label: 'Danh mục' },
+  { path: '/admin/banners', icon: Image, label: 'Banner' },
   { path: '/admin/orders', icon: ShoppingCart, label: 'Đơn hàng' },
   { path: '/admin/users', icon: Users, label: 'Người dùng' },
   { path: '/admin/analytics', icon: BarChart3, label: 'Thống kê' },

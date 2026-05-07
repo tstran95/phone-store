@@ -23,7 +23,7 @@ public class BrandController {
         if (categoryId != null) {
             brands = brandRepository.findByCategoryId(categoryId);
         } else {
-            brands = brandRepository.findByIsActiveTrue();
+            brands = brandRepository.findByIsActiveTrueOrderByNameAsc();
         }
         return ResponseEntity.ok(ApiResponse.success(brands));
     }

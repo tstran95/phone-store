@@ -110,7 +110,6 @@ com/phonestore/controller/VNPayController.class
 com/phonestore/dto/response/ReviewResponse$ReviewerInfo$ReviewerInfoBuilder.class
 com/phonestore/config/ResponseWrapper$TeeServletOutputStream.class
 com/phonestore/controller/NotificationController.class
-com/phonestore/controller/BrandController.class
 com/phonestore/entity/Notification$NotificationBuilder.class
 com/phonestore/dto/response/PagedResponse$PagedResponseBuilder.class
 com/phonestore/dto/response/ApiResponse.class

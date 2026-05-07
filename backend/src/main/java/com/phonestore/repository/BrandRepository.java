@@ -14,10 +14,10 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
 
     Optional<Brand> findBySlug(String slug);
 
-    List<Brand> findByIsActiveTrue();
+    List<Brand> findByIsActiveTrueOrderByNameAsc();
 
     boolean existsBySlug(String slug);
 
-    @Query("SELECT DISTINCT b FROM Brand b JOIN Product p ON p.brand.id = b.id WHERE p.category.id = :categoryId AND b.isActive = true")
+    @Query("SELECT DISTINCT b FROM Brand b JOIN b.products p WHERE p.category.id = :categoryId AND p.isActive = true AND b.isActive = true")
     List<Brand> findByCategoryId(@Param("categoryId") Long categoryId);
 }

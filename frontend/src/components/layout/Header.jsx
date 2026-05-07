@@ -17,15 +17,22 @@ import { useAuthStore } from '../../stores/authStore'
 import { useCartStore } from '../../stores/cartStore'
 import { useWishlistStore } from '../../stores/wishlistStore'
 import { useNotificationStore } from '../../stores/notificationStore'
+import { useCategoryStore } from '../../stores/categoryStore'
 
-const categories = [
-  { id: 1, name: 'Điện thoại', slug: 'dien-thoai', icon: '📱' },
-  { id: 2, name: 'Laptop', slug: 'laptop', icon: '💻' },
-  { id: 3, name: 'Máy tính bảng', slug: 'may-tinh-bang', icon: '📚' },
-  { id: 4, name: 'Đồng hồ thông minh', slug: 'dong-ho', icon: '⌚' },
-  { id: 5, name: 'Phụ kiện', slug: 'phu-kien', icon: '🔌' },
-  { id: 6, name: 'Âm thanh', slug: 'am-thanh', icon: '🎧' },
-]
+// Icon mapping for categories
+const iconMap = {
+  'dien-thoai': '📱',
+  'laptop': '💻',
+  'may-tinh-bang': '📚',
+  'dong-ho': '⌚',
+  'phu-kien': '🔌',
+  'am-thanh': '🎧',
+  'smartphone': '📱',
+  'tablet': '📚',
+  'watch': '⌚',
+  'accessory': '🔌',
+  'audio': '🎧',
+}
 
 function Header() {
   const navigate = useNavigate()
@@ -33,6 +40,7 @@ function Header() {
   const { items: cartItems, getTotalItems } = useCartStore()
   const { count: wishlistCount, fetchCount } = useWishlistStore()
   const { unreadCount, fetchUnreadCount, subscribe, unsubscribe } = useNotificationStore()
+  const { categories, fetchCategories } = useCategoryStore()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -49,6 +57,11 @@ function Header() {
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    // Fetch categories on mount
+    fetchCategories()
   }, [])
 
   useEffect(() => {
@@ -141,18 +154,26 @@ function Header() {
 
               {/* Category Dropdown */}
               {isCategoryOpen && (
-                <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl shadow-dropdown py-2 animate-fade-in">
-                  {categories.map((cat) => (
-                    <Link
-                      key={cat.id}
-                      to={`/danh-muc/${cat.slug}`}
-                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
-                      onClick={() => setIsCategoryOpen(false)}
-                    >
-                      <span className="text-xl mr-3">{cat.icon}</span>
-                      <span className="font-medium">{cat.name}</span>
-                    </Link>
-                  ))}
+                <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl shadow-dropdown py-2 animate-fade-in max-h-96 overflow-y-auto">
+                  {categories.length > 0 ? (
+                    categories.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        to={`/danh-muc/${cat.slug}`}
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
+                        onClick={() => setIsCategoryOpen(false)}
+                      >
+                        <span className="text-xl mr-3">
+                          {cat.icon || iconMap[cat.slug] || '📦'}
+                        </span>
+                        <span className="font-medium">{cat.name}</span>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-gray-400 text-sm">
+                      Đang tải danh mục...
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -310,17 +331,25 @@ function Header() {
         <div className="lg:hidden bg-white border-t shadow-lg animate-fade-in">
           <div className="container-custom py-4">
             <nav className="space-y-2">
-              {categories.map((cat) => (
-                <Link
-                  key={cat.id}
-                  to={`/danh-muc/${cat.slug}`}
-                  className="flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <span className="text-xl mr-3">{cat.icon}</span>
-                  <span className="font-medium">{cat.name}</span>
-                </Link>
-              ))}
+              {categories.length > 0 ? (
+                categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={`/danh-muc/${cat.slug}`}
+                    className="flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span className="text-xl mr-3">
+                      {cat.icon || iconMap[cat.slug] || '📦'}
+                    </span>
+                    <span className="font-medium">{cat.name}</span>
+                  </Link>
+                ))
+              ) : (
+                <div className="px-4 py-3 text-gray-400 text-sm">
+                  Đang tải danh mục...
+                </div>
+              )}
             </nav>
             {!isAuthenticated && (
               <div className="mt-4 pt-4 border-t">

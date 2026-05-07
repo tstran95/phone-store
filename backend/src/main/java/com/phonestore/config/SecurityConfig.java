@@ -56,6 +56,8 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/v1/payments/ipn").permitAll()
+                // Serve uploaded files
+                .requestMatchers("/uploads/**").permitAll()
                 // Authenticated endpoints
                 .requestMatchers("/v1/carts/**").authenticated()
                 .requestMatchers("/v1/orders/**").authenticated()
@@ -64,6 +66,7 @@ public class SecurityConfig {
                 .requestMatchers("/v1/reviews/**").authenticated()
                 // Admin endpoints
                 .requestMatchers("/v1/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers("/v1/upload/**").hasAnyRole("ADMIN", "MANAGER")
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

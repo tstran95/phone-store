@@ -14,6 +14,8 @@ import Orders from './pages/Orders'
 import OrderDetail from './pages/OrderDetail'
 import PaymentResult from './pages/PaymentResult'
 import SearchResults from './pages/SearchResults'
+import Wishlist from './pages/Wishlist'
+import Notifications from './pages/Notifications'
 
 // Admin imports
 import AdminLayout from './components/admin/AdminLayout'
@@ -21,6 +23,8 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProducts from './pages/admin/AdminProducts'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminUsers from './pages/admin/AdminUsers'
+import AdminCategories from './pages/admin/AdminCategories'
+import AdminBanners from './pages/admin/AdminBanners'
 
 function App() {
   return (
@@ -41,6 +45,8 @@ function App() {
         <Route path="don-hang" element={<Orders />} />
         <Route path="don-hang/:orderNumber" element={<OrderDetail />} />
         <Route path="thanh-toan/ket-qua" element={<PaymentResult />} />
+        <Route path="yeu-thich" element={<Wishlist />} />
+        <Route path="thong-bao" element={<Notifications />} />
       </Route>
 
       {/* Admin routes */}
@@ -49,6 +55,8 @@ function App() {
         <Route path="products" element={<AdminProducts />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="categories" element={<AdminCategories />} />
+        <Route path="banners" element={<AdminBanners />} />
         <Route path="analytics" element={<div>Analytics Page (Coming Soon)</div>} />
         <Route path="settings" element={<div>Settings Page (Coming Soon)</div>} />
       </Route>

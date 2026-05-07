@@ -1,4 +1,4 @@
-package com.phonestore.dto.response;
+package com.phonestore.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,14 +11,13 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryResponse {
+public class CategoryRequest {
 
-    private Long id;
     private String name;
     private String slug;
     private String description;
     private String imageUrl;
-    private Long parentId;
     private Integer displayOrder;
     private Boolean isActive;
+    private Long parentId;
 }

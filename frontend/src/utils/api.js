@@ -162,6 +162,27 @@ export const searchApi = {
     api.get('/products/search', { params: { q, page, size } }),
 }
 
+// Upload API
+export const uploadApi = {
+  uploadImage: (file, folder = 'temp') => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('folder', folder)
+    return api.post('/upload/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  uploadMultiple: (files, folder = 'temp') => {
+    const formData = new FormData()
+    files.forEach((file) => formData.append('files', file))
+    formData.append('folder', folder)
+    return api.post('/upload/multiple', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  deleteFile: (url) => api.delete('/upload/delete', { params: { url } }),
+}
+
 // Notification API
 export const notificationApi = {
   getAll: (page = 0, size = 20) =>
@@ -178,6 +199,20 @@ export const adminApi = {
   getDashboardStats: () => api.get('/admin/dashboard/stats'),
   getRecentOrders: (limit = 10) => api.get('/admin/dashboard/recent-orders', { params: { limit } }),
   getTopProducts: (limit = 10) => api.get('/admin/dashboard/top-products', { params: { limit } }),
+
+  // Categories
+  getCategories: () => api.get('/admin/categories'),
+  getCategory: (id) => api.get(`/admin/categories/${id}`),
+  createCategory: (data) => api.post('/admin/categories', data),
+  updateCategory: (id, data) => api.put(`/admin/categories/${id}`, data),
+  deleteCategory: (id) => api.delete(`/admin/categories/${id}`),
+
+  // Banners
+  getBanners: () => api.get('/admin/banners'),
+  createBanner: (data) => api.post('/admin/banners', data),
+  updateBanner: (id, data) => api.put(`/admin/banners/${id}`, data),
+  deleteBanner: (id) => api.delete(`/admin/banners/${id}`),
+  reorderBanners: (orders) => api.post('/admin/banners/reorder', { orders }),
 
   // Products
   getProducts: (params) => api.get('/admin/products', { params }),

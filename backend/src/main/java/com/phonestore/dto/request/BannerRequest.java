@@ -1,4 +1,4 @@
-package com.phonestore.dto.response;
+package com.phonestore.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,19 +6,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryResponse {
+public class BannerRequest {
 
-    private Long id;
-    private String name;
-    private String slug;
+    private String title;
     private String description;
     private String imageUrl;
-    private Long parentId;
+    private String linkUrl;
+    private String buttonText;
     private Integer displayOrder;
     private Boolean isActive;
+    private String position;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
 }

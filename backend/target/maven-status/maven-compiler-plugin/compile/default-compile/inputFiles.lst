@@ -1,5 +1,6 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/NotificationService.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/enums/CartStatus.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/FileStorageService.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/CartController.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/Cart.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/request/UpdateCartItemRequest.java
@@ -13,16 +14,20 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/config/DataInitializer.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/CartItem.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/util/LogUtil.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/config/WebMvcConfig.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/Banner.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/ProductImage.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/Category.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/Payment.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/CartItem.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/WishlistService.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/config/ProductDataInitializer.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/enums/TransactionType.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/request/ResetPasswordRequest.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/config/SecurityConfig.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/AuthController.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/enums/PaymentStatus.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/UploadController.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/PasswordResetTokenRepository.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/OrderResponse.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/ApiResponse.java
@@ -49,6 +54,7 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/UserRepository.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/StockAlert.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/NotificationResponse.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/request/BannerRequest.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/BrandController.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/CartService.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/PaymentRepository.java
@@ -65,6 +71,7 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/enums/ProductStatus.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/request/LoginRequest.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/Product.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/BannerRepository.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/service/OrderService.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/security/JwtAuthenticationEntryPoint.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/CategoryController.java
@@ -83,6 +90,7 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/OrderController.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/controller/VNPayController.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/CartResponse.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/BannerResponse.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/config/ResponseWrapper.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/entity/Notification.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/ReviewStatsResponse.java
@@ -96,8 +104,10 @@
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/security/JwtAuthenticationFilter.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/config/LoggingConfig.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/ProductVariantRepository.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/request/CategoryRequest.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/ProductRepository.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/PaymentResponse.java
+/Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/ProductImageRepository.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/PagedResponse.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/repository/StockAlertRepository.java
 /Users/tstran95/ALL_IN_ONE/IT/PROJECT/phone-store/backend/src/main/java/com/phonestore/dto/response/CategoryResponse.java
